@@ -35,6 +35,8 @@ import sys
 import re
 import argparse
 
+__author__ = "marcornett"
+
 
 def extract_names(filename):
     """
@@ -44,7 +46,31 @@ def extract_names(filename):
     ['2006', 'Aaliyah 91', 'Aaron 57', 'Abagail 895', ...]
     """
     names = []
-    # +++your code here+++
+    with open(filename, 'r') as f:
+        text_to_search = f.read()
+
+        year_pattern = re.compile(r'Popularity in (\d+)')
+        name_rank_pattern = re.compile(
+            r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>')
+
+        year_lst = year_pattern.findall(text_to_search)
+        names_rank_lst = name_rank_pattern.findall(text_to_search)
+
+        names_dict = {}
+        for name_rank in names_rank_lst:
+            # print(name_rank)
+            rank = name_rank[0]
+            if name_rank[1] not in names_dict:
+                names_dict[name_rank[1]] = rank
+            if name_rank[2] not in names_dict:
+                names_dict[name_rank[2]] = rank
+
+        names_list = sorted(names_dict.items(),
+                            key=lambda names_dict: names_dict[0])
+
+        names.append(''.join(year_lst))
+        for name in names_list:
+            names.append(' '.join(name))
     return names
 
 
@@ -82,7 +108,15 @@ def main(args):
     # Use the create_summary flag to decide whether to print the list
     # or to write the list to a summary file (e.g. `baby1990.html.summary`).
 
-    # +++your code here+++
+    if create_summary:
+        for ns_file in file_list:
+            names = extract_names(ns_file)
+            with open(f'{ns_file}.summary', 'w') as f:
+                f.write('\n'.join(names))
+    else:
+        for ns_file in file_list:
+            names = extract_names(ns_file)
+            print('\n'.join(names))
 
 
 if __name__ == '__main__':
